@@ -1,49 +1,94 @@
 <?xml version="1.0" encoding="EUC-JP" ?>
 <project name="GSDistribute" default="compile" basedir=".">
 
-	<!-- エンコーディングはEUCJISを使う -->
+  <!-- エンコーディングはEUCJISを使う -->
 
-	<property name="srcdir" value="src" />
-	<property name="bindir" value="classes" />
-	<property name="resdir" value="${srcdir}/resource" />
+  <property name="srcdir" value="src" />
+  <property name="bindir" value="classes" />
+  <property name="resdir" value="${srcdir}/resource" />
+  <property name="rpmdir" value="rpmbuild" />
 
-	<!-- Set Classpath -->
-	<path id="base.classpath">
-		<pathelement path="${bindir}" />
-	</path>
+  <!-- RPMBUILD用プロパティーズ -->
+  <property name="version" value="1.0" />
+  <property name="srcjar" value="GSDistribute-source-${version}.jar" />
+  <property name="binjar" value="GSDistribute-${version}.jar" />
 
-	<!-- ### Prepare Target -->
-	<target name="prepare">
-		<mkdir dir="${bindir}" />
-	</target>
+  <!-- Set Classpath -->
+  <path id="base.classpath">
+    <pathelement path="${bindir}" />
+  </path>
 
-	<!-- ### Resource Target -->
-	<target name="resource" depends="prepare">
-		<copy todir="${bindir}/resource" file="${resdir}/resource.properties" />
-		<native2ascii encoding="EUCJIS"
-		              dest="${bindir}/resource"
-		              src="${resdir}"
-		              ext=".properties"
-		              includes="*.eucjis" />
-	</target>
+  <!-- ### Prepare Target -->
+  <target name="prepare">
+    <mkdir dir="${bindir}" />
+  </target>
 
-	<!-- ### Compile Target -->
-	<target name="compile" depends="resource">
-		<javac srcdir="${srcdir}" destdir="${bindir}" encoding="EUCJIS">
-			<classpath refid="base.classpath" />
-		</javac>
-	</target>
+  <!-- ### Resource Target -->
+  <target name="resource" depends="prepare">
+    <copy todir="${bindir}/resource" file="${resdir}/resource.properties" />
+    <native2ascii encoding="EUCJIS"
+                  dest="${bindir}/resource"
+                  src="${resdir}"
+                  ext=".properties"
+                  includes="*.eucjis" />
+  </target>
 
-	<!-- ### Run Target -->
-	<target name="run" depends="compile">
-		<java classname="net.kuroichigo.GSDistribute.Entry" fork="yes">
-			<classpath refid="base.classpath" />
-		</java>
-	</target>
+  <!-- ### Compile Target -->
+  <target name="compile" depends="resource">
+    <javac srcdir="${srcdir}" destdir="${bindir}" encoding="EUCJIS">
+      <classpath refid="base.classpath" />
+    </javac>
+  </target>
 
-	<!-- ### Clean Target -->
-	<target name="clean">
-		<delete dir="${bindir}" />
-	</target>
+  <!-- ### Run Target -->
+  <target name="run" depends="compile">
+    <java classname="net.kuroichigo.GSDistribute.Entry" fork="yes">
+      <classpath refid="base.classpath" />
+    </java>
+  </target>
+
+
+  <!-- ### RPM Target -->
+  <target name="rpm">
+    <mkdir dir="${rpmdir}" />
+    <mkdir dir="${rpmdir}/SPECS" />
+    <mkdir dir="${rpmdir}/BUILD" />
+    <mkdir dir="${rpmdir}/RPMS" />
+    <mkdir dir="${rpmdir}/SOURCES" />
+    <mkdir dir="${rpmdir}/SRPMS" />
+    <copy todir="${rpmdir}/SPECS" file="GSDistribute.spec" />
+    <jar destfile="${rpmdir}/SOURCES/${srcjar}" basedir=".">
+      <include name="build.xml" />
+      <include name="${srcdir}/**" />
+    </jar>
+    <rpm specfile="GSDistribute.spec"
+         topDir="${rpmdir}"
+         cleanbuilddir="true" />
+  </target>
+
+  <!-- ### Install Target for RPM -->
+  <target name="install" if="destdir">
+    <mkdir dir="${destdir}" />
+    <antcall target="jar">
+    </antcall>
+  </target>
+
+  <!-- ### Jar Target for RPM -->
+  <target name="jar" depends="compile">
+    <jar destfile="${destdir}/${binjar}" update="yes">
+      <fileset dir="${bindir}" />
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Main-Class"
+                   value="net.kuroichigo.GSDistribute.Entry" />
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- ### Clean Target -->
+  <target name="clean">
+    <delete dir="${bindir}" />
+    <delete dir="${rpmdir}" />
+  </target>
 
 </project>

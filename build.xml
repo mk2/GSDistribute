@@ -57,6 +57,7 @@
     <mkdir dir="${rpmdir}/SOURCES" />
     <mkdir dir="${rpmdir}/SRPMS" />
     <copy todir="${rpmdir}/SPECS" file="GSDistribute.spec" />
+    <copy todir="${rpmdir}/SOURCES" file="GSDistribute" />
     <jar destfile="${rpmdir}/SOURCES/${srcjar}" basedir=".">
       <include name="build.xml" />
       <include name="${srcdir}/**" />

@@ -20,6 +20,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import net.kuroichigo.GSDistribute.support.MainController;
 import net.kuroichigo.GSDistribute.support.ResourceManager;
@@ -35,6 +37,17 @@ public class MainFrame extends JFrame {
    */
   public MainFrame(MainController mainCtl, Vector<Vector<String>> fileLst,
       Vector<String> colNam) {
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (InstantiationException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (UnsupportedLookAndFeelException e) {
+      e.printStackTrace();
+    }
     _mainCtl = mainCtl;
     _resMgr = ResourceManager.getResourceManager();
     _fileLst = fileLst;
